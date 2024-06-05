@@ -32,12 +32,12 @@ def parse_data(researcher):
         researcher_name = " ".join(researcher_name.split(" ")[:-2])
     return researcher_name
 
-def main():
+def main(): 
     url = "http://www.arh.ukim.edu.mk/index.php/en/structure/people"
     html = get_html_for_page(url)
     soup = BeautifulSoup(html, "html.parser")
     content = soup.find("div", {"class": "item-page"})
-    staff = content.select("p")
+    
     data = [parse_data(researcher) for i, researcher in enumerate(staff) if (i != 0 and i < 28) or (i >= 31 and i < 32)]
     print(data)
 
