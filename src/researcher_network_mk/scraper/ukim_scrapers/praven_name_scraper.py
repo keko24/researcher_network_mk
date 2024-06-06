@@ -1,8 +1,13 @@
+import os
 import requests
-from bs4 import BeautifulSoup
-from transliterate import translit
 
-USERNAME = "bube123" 
+import pandas as pd
+from bs4 import BeautifulSoup
+
+from researcher_network_mk.utils import get_project_root
+from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
+
+USERNAME = "bube12_dKwRX"
 PASSWORD = "Researchscraper123"
 
 def get_html_for_page(url):
@@ -21,13 +26,13 @@ def get_html_for_page(url):
 def parse_data(researcher):
     anchor_elem = researcher.select("a")[0]
     researcher_name = " ".join(anchor_elem.get_text().strip("\n").split(" ")[1:])
-    researcher_latin_name = translit(researcher_name, 'mk', reversed=True)
+    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
     return researcher_latin_name
 
 def parse_ass(researcher):
     anchor_elem = researcher.select("a")[0]
     researcher_name = " ".join(anchor_elem.get_text().strip("\n").split(", м-р ")[::-1])
-    researcher_latin_name = translit(researcher_name, 'mk', reversed=True)
+    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
     return researcher_latin_name
 
 def parse_pen(idx, researcher):
@@ -52,11 +57,13 @@ def parse_pen(idx, researcher):
         researcher_name = " ".join(researcher_name.split(", д-р ")[::-1])
     else:
         researcher_name = " ".join(researcher_name.split(" ")[2:][::-1])
-    researcher_latin_name = translit(researcher_name, 'mk', reversed=True)
+    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
     return researcher_latin_name
 
 def main():
     urls = ["https://pf.ukim.edu.mk/redovni-profesorin/", "https://pf.ukim.edu.mk/vonredni-profesorin/", "https://pf.ukim.edu.mk/doczenti/", "https://pf.ukim.edu.mk/asistenti/", "https://pf.ukim.edu.mk/penzionirani-profesori/"]
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    data = []
     for i, url in enumerate(urls):
         html = get_html_for_page(url)
         soup = BeautifulSoup(html, "html.parser")
@@ -67,12 +74,14 @@ def main():
         content = content.select("tbody")[0]
         staff = content.select("tr")
         if i == 4:
-            data = [parse_pen(i, researcher) for i, researcher in enumerate(staff) if i != 0]
+            data.extend([parse_pen(i, researcher) for i, researcher in enumerate(staff) if i != 0])
         elif i == 3:
-            data = [parse_ass(researcher) for researcher in staff]
+            data.extend([parse_ass(researcher) for researcher in staff])
         else:
-            data = [parse_data(researcher) for researcher in staff]
-        print(data)
+            data.extend([parse_data(researcher) for researcher in staff])
+    os.makedirs(results_path, exist_ok=True)
+    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "praven.csv"))
+
 
 if __name__ == "__main__":
     main()

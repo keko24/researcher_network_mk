@@ -8,18 +8,14 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 from researcher_network_mk.utils import get_project_root
-
-USERNAME = "bube123" 
-PASSWORD = "Researchscraper123"
+from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
 
 def parse_text(text):
     if " / " in text:
-        return text.split(" / ")[1]
+        return text.split(" / ")[0]
     elif "/" in text:
-        return text.split("/")[1]
-    else:
-        return translit(text, 'mk', reversed=True)
-
+        return text.split("/")[0]
+    return transliterate_cyrillic_to_latin(text)
 
 def main():
     faculties = {"zf": "zemjodelski", "ef": "ekonomski", "pf": "praven", "fon": "obrazovni_nauki", "fmn": "medicinski", "ff": "filoloski", "etf": "elektro", "inf": "informatika", "ma": "muzicko", "fa": "filmska", "la": "likovno", "va": "voena", "mf": "masinski", "ttf": "tehnoloski", "fptn": "prirodno_tehnicki", "ftbl": "turizam", "filip-vtori": "filip_vtori"}
@@ -42,10 +38,9 @@ def main():
                     text = ps[k].find_element(By.XPATH, ".//child::a").get_attribute("text")
                     text = parse_text(text)
                     data[faculty].append(text)
-                    print(text)
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ugd")
+    os.makedirs(results_path, exist_ok=True)
     for faculty in data.keys():
-        results_path = os.path.join(get_project_root(), "data", "researchers", "ugd")
-        os.makedirs(results_path, exist_ok=True)
         pd.DataFrame(data[faculty], columns=["name"]).to_csv(os.path.join(results_path, f"{faculties[faculty]}.csv"))
 
 if __name__ == "__main__":

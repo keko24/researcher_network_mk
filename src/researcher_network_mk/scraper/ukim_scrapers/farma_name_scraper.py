@@ -4,13 +4,13 @@ import time
 
 import pandas as pd
 from bs4 import BeautifulSoup
-from transliterate import translit
+from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
 from researcher_network_mk.utils import get_project_root
 
-USERNAME = "bube123" 
+USERNAME = "bube12_dKwRX"
 PASSWORD = "Researchscraper123"
 
 def parse_text(text):
@@ -18,11 +18,12 @@ def parse_text(text):
         text = " ".join(text.split(" ")[1:])
     else:
         text = " ".join(text.split(" ")[2:])
-    return translit(text, 'mk', reversed=True)
+    return transliterate_cyrillic_to_latin(text)
 
 
 def main():
     data = [] 
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
     url = "http://www.ff.ukim.edu.mk/наставно-научен-и-соработнички-кадар/"
     driver = webdriver.Firefox()
     driver.get(url)
@@ -31,10 +32,12 @@ def main():
         elems = driver.find_elements(By.CLASS_NAME, 'elementor-image-box-title')
         for elem in elems:
             text = parse_text(elem.text)
-            if text:
-                print(text)
             data.append(text)
         driver.find_element(By.ID, faculty).click()
+
+    os.makedirs(results_path, exist_ok=True)
+    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "farmacija.csv"))
+
 
 if __name__ == "__main__":
     main()

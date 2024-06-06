@@ -3,9 +3,11 @@ import requests
 
 import pandas as pd
 from bs4 import BeautifulSoup
-from transliterate import translit
 
-USERNAME = "bube123" 
+from researcher_network_mk.utils import get_project_root
+from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
+
+USERNAME = "bube12_dKwRX"
 PASSWORD = "Researchscraper123"
 
 def get_html_for_page(url):
@@ -29,7 +31,7 @@ def parse_data(researcher):
     else:
         researcher_name = researcher.split("сор. ")
     researcher_name = researcher_name[1].strip(" ")
-    researcher_latin_name = translit(researcher_name, 'mk', reversed=True)
+    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
     return researcher_latin_name
 
 def main():
@@ -38,7 +40,6 @@ def main():
     results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
     data = []
     for i, path in enumerate(paths):
-        print(path)
         html = get_html_for_page(url + path)
         soup = BeautifulSoup(html, "html.parser")
         content = soup.find("div", {"class": "entry-content"})

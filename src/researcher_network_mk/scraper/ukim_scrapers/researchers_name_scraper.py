@@ -1,8 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
-from transliterate import translit
+from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
 
-USERNAME = "haxorkid02" 
+USERNAME = "bube12_dKwRX"
 PASSWORD = "Researchscraper123"
 
 def get_html_for_page(url):
@@ -21,7 +21,7 @@ def get_html_for_page(url):
 def parse_data(researcher):
     anchor_elem = researcher.select("a")[0]
     researcher_name = " ".join(anchor_elem.get_text().strip("\n").split(" ")[::-1])
-    researcher_latin_name = translit(researcher_name, 'mk', reversed=True)
+    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
     return researcher_latin_name
 
 def main():

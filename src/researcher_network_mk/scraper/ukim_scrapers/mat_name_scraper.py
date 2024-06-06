@@ -1,8 +1,13 @@
+import os
 import requests
-from bs4 import BeautifulSoup
-from transliterate import translit
 
-USERNAME = "bube123" 
+import pandas as pd
+from bs4 import BeautifulSoup
+
+from researcher_network_mk.utils import get_project_root
+from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
+
+USERNAME = "bube12_dKwRX"
 PASSWORD = "Researchscraper123"
 
 def get_html_for_page(url):
@@ -27,18 +32,22 @@ def parse_data(researcher):
         if c.isupper() and i != 0:
             researcher_latin_name += " "
         researcher_latin_name += c
-    researcher_latin_name = translit(researcher_latin_name, 'mk', reversed=True)
+    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_latin_name)
     return researcher_latin_name.strip()
 
 def main():
     urls = ["https://im.pmf.ukim.edu.mk/titles/view/19", "https://im.pmf.ukim.edu.mk/titles/view/2", "https://im.pmf.ukim.edu.mk/titles/view/17", "https://im.pmf.ukim.edu.mk/titles/view/13", "https://im.pmf.ukim.edu.mk/titles/view/18", "https://im.pmf.ukim.edu.mk/titles/view/12", "https://im.pmf.ukim.edu.mk/titles/view/15", "https://im.pmf.ukim.edu.mk/titles/view/11"]
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    data = []
     for url in urls:
         html = get_html_for_page(url)
         soup = BeautifulSoup(html, "html.parser")
         content = soup.find("div", {"class": "col-md-8"})
         staff = content.find_all("div", {"class": "teachers"})
-        data = [parse_data(researcher) for researcher in staff]
-        print(data)
+        data.extend([parse_data(researcher) for researcher in staff])
+    os.makedirs(results_path, exist_ok=True)
+    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "matematika.csv"))
+
 
 if __name__ == "__main__":
     main()
