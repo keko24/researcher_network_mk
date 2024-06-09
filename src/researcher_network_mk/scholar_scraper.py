@@ -55,6 +55,8 @@ def main():
         for (faculty_name, faculty_path) in universities[university]:
             researchers = pd.read_csv(faculty_path, index_col=0)
             for researcher in researchers.itertuples():
+                if researcher.processed:
+                    continue
                 researcher_names = transliterate_cyrillic_to_latin(researcher.name)
                 logger.info(f"Currently processing researcher {researcher_names[0]} from {faculty_name.upper()} at {university.upper()}")
                 for researcher_name in researcher_names:
