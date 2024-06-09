@@ -72,6 +72,7 @@ def main():
                         break
                     except Exception as e:
                         logger.error(f"An error occured for {researcher_name}: {e}")
+                        time.sleep(random.uniform(0.5, 1))
                 if not researcher.processed:
                     logger.error(f"{researcher_names[0]} could not be found.")
                 researchers.loc[researcher.Index] = pd.Series({col: getattr(researcher, col) for col in researchers.columns})
