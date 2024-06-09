@@ -24,9 +24,7 @@ def get_pub_properties(publication):
         publication_type = "book"
     else:
         publication_type = "other"
-    title = decode_unicode_escapes(pub_bib["title"])
-    author = decode_unicode_escapes(pub_bib["author"])
-    return {"title": title, "authors": author.split(" and "), "publication_type": publication_type, "num_citations": publication["num_citations"]}
+    return {"title": pub_bib["title"], "authors": pub_bib["author"].split(" and "), "publication_type": publication_type, "num_citations": publication["num_citations"]}
 
 def get_publications_info(researcher_name):
     search_query = scholarly.search_author(researcher_name)
@@ -35,7 +33,7 @@ def get_publications_info(researcher_name):
     publications = []
     for pub in author["publications"]:
         pub_full = scholarly.fill(pub)
-        time.sleep(random.uniform(1, 3))
+        time.sleep(random.uniform(1, 2))
         publications.append(get_pub_properties(pub_full)) 
     return publications
 
@@ -68,15 +66,16 @@ def main():
                         # coauthors = get_coauthors_stats(publications)
                         save_publications(publications, university, faculty_name, researcher_name)
                         logger.info(f"Coauthor network for {researcher_name} has been created.")
-                        researcher.processed = True
+                        researcher = researcher._replace(processed = True)
                         break
                     except Exception as e:
                         logger.error(f"An error occured for {researcher_name}: {e}")
                         time.sleep(random.uniform(0.5, 1))
                 if not researcher.processed:
                     logger.error(f"{researcher_names[0]} could not be found.")
-                researchers.loc[researcher.Index] = pd.Series({col: getattr(researcher, col) for col in researchers.columns})
-                researchers.to_csv(faculty_path)
+                else:
+                    researchers.loc[researcher.Index] = pd.Series({col: getattr(researcher, col) for col in researchers.columns})
+                    researchers.to_csv(faculty_path)
 
 if __name__ == "__main__":
     main()
