@@ -21,7 +21,7 @@ def get_html_for_page(url):
 def parse_data(researcher):
     anchor_elem = researcher.select("a")[0]
     researcher_name = " ".join(anchor_elem.get_text().strip("\n").split(" ")[::-1])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():

@@ -25,12 +25,12 @@ def get_html_for_page(url):
 
 def parse_data(researcher):
     researcher_name = researcher.select("td")[1].select("p")[0].get_text()
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name.strip()
 
 def main():
     urls = ["https://seismobsko.pmf.ukim.edu.mk/chronologicalpersonnel"]
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "seizmologija")
     data = []
     for url in urls:
         html = get_html_for_page(url)
@@ -41,7 +41,10 @@ def main():
         data.extend([parse_data(researcher) for researcher in staff[1:]])
         
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "seizmologija.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":

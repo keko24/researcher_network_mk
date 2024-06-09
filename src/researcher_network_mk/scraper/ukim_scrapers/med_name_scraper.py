@@ -31,13 +31,13 @@ def parse_data(researcher):
     else:
         researcher_name = researcher.split("сор. ")
     researcher_name = researcher_name[1].strip(" ")
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
     url = "http://medf.ukim.edu.mk/"
     paths = ["редовни-професори", "вонредни-професори", "насловни-вонредни-професори", "доценти", "насловни-доценти", "асистенти-според-нов-зво", "виши-научни-соработници", "научни-соработници", "научни-советници", "пензионирани-професори-на-медицинск", "алумни", "in-memoriam"]
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "medf")
     data = []
     for i, path in enumerate(paths):
         html = get_html_for_page(url + path)
@@ -50,7 +50,10 @@ def main():
             staff = content.select("li")
         data.extend([parse_data(researcher.get_text().replace(u'\xa0', u' ').strip("\n")) for researcher in staff if researcher.get_text()])
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "medf.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 if __name__ == "__main__":
     main()

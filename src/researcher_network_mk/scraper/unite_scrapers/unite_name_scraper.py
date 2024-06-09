@@ -12,7 +12,7 @@ def parse_text(text):
         text = text.split(" / ")[1]
     elif "/" in text:
         text = text.split("/")[1]
-    return transliterate_cyrillic_to_latin(text)
+    return text
 
 def main():
     faculties = ["ekonomski-fakultet", "pedagoski-fakultet", "praven-fakultet", "fakultet-za-biznis-administracija", "fakultet-za-zemjodelstvo-i-biotehnologija", "fakultet-za-medicinski-nauki", "fakultet-za-prehranbrena-tehnologija-i-ishrana", "fakultet-za-primeneti-nauki", "fakultet-za-prirodno-matematicki-nauki", "fakultet-za-umetnosti", "fakultet-za-fizicka-kultura", "filozofski-fakultet", "filoloski-fakultet"]
@@ -37,7 +37,11 @@ def main():
                 text = " ".join(elem.get_attribute("innerHTML").split('\n')[1].strip("<br>").split(" ")[3:])
             text = parse_text(text)
             data.append(text)
-        pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, faculty + ".csv"))
+        faculty_path = os.path.join(results_path, faculty)
+        os.makedirs(faculty_path, exist_ok=True)
+        df = pd.DataFrame(data, columns=["name"])
+        df["processed"] = False
+        df.to_csv(os.path.join(faculty_path, "researchers.csv"))
 
 if __name__ == "__main__":
     main()

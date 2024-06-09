@@ -27,7 +27,7 @@ def parse_data(researcher):
     researcher_content = researcher.find("div", {"class": "item-content"})
     anchor_elem = researcher_content.select("a")[0]
     researcher_name = " ".join(anchor_elem.get_text().strip("\n").split(" ")[-2:][::-1])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
@@ -37,7 +37,7 @@ def main():
             "http://gf.ukim.edu.mk/member/tip_profesor/docent/",
             "http://gf.ukim.edu.mk/member/tip_profesor/asistent/"
     ]
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "gradezhen")
     data = []
     for url in urls:
         html = get_html_for_page(url)
@@ -46,7 +46,10 @@ def main():
         staff = content.find_all("div", {"class": "member-item"})
         data = [parse_data(researcher) for researcher in staff]
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "gradezhen.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":

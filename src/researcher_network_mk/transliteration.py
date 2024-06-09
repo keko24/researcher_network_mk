@@ -1,3 +1,5 @@
+import re
+
 cyrillic_to_latin_map = {
     "а": ["a"],
     "б": ["b"],
@@ -22,12 +24,12 @@ cyrillic_to_latin_map = {
     "р": ["r"],
     "с": ["s"],
     "т": ["t"],
-    "ќ": ["kj", "k", "ḱ"],
+    "ќ": ["kj", "k", "ḱ", "ch", "c", "č"],
     "у": ["u"],
     "ф": ["f"],
     "х": ["h"],
     "ц": ["c"],
-    "ч": ["ch", "c", "č"],
+    "ч": ["ch", "c", "č", "kj", "k", "ḱ"],
     "џ": ["dz", "dj", "dž", "dzh"],
     "ш": ["sh", "s", "š"],
     "А": ["A"],
@@ -63,6 +65,22 @@ cyrillic_to_latin_map = {
     "Ш": ["Sh", "S", "Š"],
 }
 
+def split_surnames(name):
+    if "Хаџи" not in name and "хаџи" not in name:
+        name = name.replace(" - ", " ").replace("-", " ")
+    else:
+        name = name.replace(" - ", "-")
+    name_split = name.split(" ")
+    if len(name_split) > 2:
+        first_name, first_surname, second_surname = name_split
+        return [f"{first_name} {first_surname}-{second_surname}", f"{first_name} {second_surname}-{first_surname}", f"{first_name} {first_surname} {second_surname}", f"{first_name} {second_surname} {first_surname}", f"{first_name} {first_surname}", f"{first_name} {second_surname}"]
+    else:
+        return [name]
+
+def replace_and_strip_spaces(text):
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
 class Trie:
     def __init__(self, name: str, map: dict[str, list[str]]) -> None:
         self.map = map
@@ -84,19 +102,15 @@ class Trie:
 
 def translit(name, map):
     trie = Trie(name, map)
-    combinations = trie.get_all_combinations()
-    return '|'.join(combinations)
+    return trie.get_all_combinations()
 
-def transliterate_cyrillic_to_latin(names: str | list[str]):
-    if isinstance(names, str):
-        return translit(names, cyrillic_to_latin_map)
-    elif isinstance(names, list):
-        return [translit(name, cyrillic_to_latin_map) for name in names if isinstance(name, str)]
-    else:
-        raise TypeError("Argument names should be a string.")
+def transliterate_cyrillic_to_latin(name: str):
+    name = replace_and_strip_spaces(name)
+    name_variations = split_surnames(name)
+    return [item for name_variation in name_variations for item in translit(name_variation, cyrillic_to_latin_map)]
 
 def main():
-    print(transliterate_cyrillic_to_latin("Вања Котевски"))
+    print(transliterate_cyrillic_to_latin("Бошко Петров-Чукалиев"))
 
 if __name__ == "__main__":
     main()

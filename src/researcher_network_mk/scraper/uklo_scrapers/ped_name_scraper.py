@@ -35,12 +35,12 @@ def parse_data(i, researcher):
         researcher_name = " ".join(anchor_elem.split("\n")[0].split(" ")[2:])
     else:
         researcher_name = " ".join(anchor_elem.split("\n")[0].split(" ")[:])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
     urls = ["https://pfbt.uklo.edu.mk/академски-кадар"]
-    results_path = os.path.join(get_project_root(), "data", "researchers", "uklo")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "uklo", "pedagoski")
     data = []
     for url in urls:
         html = get_html_for_page(url)
@@ -49,7 +49,10 @@ def main():
         staff = content.find_all("div", {"class": "fusion-text"})
         data.extend([parse_data(i, researcher) for i, researcher in enumerate(staff) if i != 0])
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "pedagoski.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 if __name__ == "__main__":
     main()

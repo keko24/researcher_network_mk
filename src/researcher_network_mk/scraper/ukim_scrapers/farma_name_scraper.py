@@ -23,7 +23,7 @@ def parse_text(text):
 
 def main():
     data = [] 
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "farmacija")
     url = "http://www.ff.ukim.edu.mk/наставно-научен-и-соработнички-кадар/"
     driver = webdriver.Firefox()
     driver.get(url)
@@ -36,7 +36,10 @@ def main():
         driver.find_element(By.ID, faculty).click()
 
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "farmacija.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":

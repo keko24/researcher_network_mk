@@ -26,13 +26,13 @@ def get_html_for_page(url):
 def parse_data(researcher):
     anchor_elem = researcher.select("a")[0]
     researcher_name = " ".join(anchor_elem.get_text().strip("\n").split(" ")[1:])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def parse_ass(researcher):
     anchor_elem = researcher.select("a")[0]
     researcher_name = " ".join(anchor_elem.get_text().strip("\n").split(", м-р ")[::-1])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def parse_pen(idx, researcher):
@@ -57,12 +57,12 @@ def parse_pen(idx, researcher):
         researcher_name = " ".join(researcher_name.split(", д-р ")[::-1])
     else:
         researcher_name = " ".join(researcher_name.split(" ")[2:][::-1])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
     urls = ["https://pf.ukim.edu.mk/redovni-profesorin/", "https://pf.ukim.edu.mk/vonredni-profesorin/", "https://pf.ukim.edu.mk/doczenti/", "https://pf.ukim.edu.mk/asistenti/", "https://pf.ukim.edu.mk/penzionirani-profesori/"]
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "praven")
     data = []
     for i, url in enumerate(urls):
         html = get_html_for_page(url)
@@ -80,7 +80,10 @@ def main():
         else:
             data.extend([parse_data(researcher) for researcher in staff])
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "praven.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":

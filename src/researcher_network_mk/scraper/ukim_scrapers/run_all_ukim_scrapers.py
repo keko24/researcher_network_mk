@@ -20,7 +20,7 @@ from researcher_network_mk.scraper.ukim_scrapers import (
     fizika_name_scraper,
     hemija_name_scraper,
     seizmologija_name_scraper,
-    afs_name_scraper,
+    arh_name_scraper,
     ek_inst_names_scraper,
     fdtme_name_scraper,
     fdu_name_scraper,
@@ -58,7 +58,7 @@ def main():
     fizika_name_scraper.main()
     hemija_name_scraper.main()
     seizmologija_name_scraper.main()
-    afs_name_scraper.main()
+    arh_name_scraper.main()
     fdtme_name_scraper.main()
     fdu_name_scraper.main()
     flf_name_scraper.main()

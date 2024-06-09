@@ -32,7 +32,7 @@ def parse_data(i, researcher):
         researcher_name = " ".join(anchor_elem.split("\n")[0].split(" ")[1:])
     else:
         researcher_name = " ".join(anchor_elem.split("\n")[0].split(" ")[2:])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def parse_second_data(researcher):
@@ -42,13 +42,13 @@ def parse_second_data(researcher):
     else:
         researcher_name = researcher_name.split("д-р ")
     researcher_name = researcher_name[1].split(" – ")[0]
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
     urls = ["https://vmsb.uklo.edu.mk/kadar/", "https://vmsb.uklo.edu.mk/angazirani-profesori/"]
     data = []
-    results_path = os.path.join(get_project_root(), "data", "researchers", "uklo")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "uklo", "medicina")
     for i, url in enumerate(urls):
         html = get_html_for_page(url)
         soup = BeautifulSoup(html, "html.parser")
@@ -60,7 +60,10 @@ def main():
             staff = content.select("p")
             data.extend([parse_second_data(researcher) for j, researcher in enumerate(staff) if "м-р" in researcher.get_text() or "д-р" in researcher.get_text()])
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "medicina.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 if __name__ == "__main__":
     main()

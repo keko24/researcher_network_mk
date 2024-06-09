@@ -26,12 +26,12 @@ def get_html_for_page(url):
 def parse_data(researcher):
     anchor_elem = researcher.select("h3")[0]
     researcher_name = " ".join(anchor_elem.get_text().split(" ")[1:])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
     urls = ["http://www.fmu.ukim.edu.mk/mk/katedra/Katedra-za-muzichka-teorija-i-pedagogija-muzikologija-kompozicija-i-dirigiranje", "http://www.fmu.ukim.edu.mk/mk/katedra/Katedra-za-gudachki-instrumenti-i-gitara", "http://www.fmu.ukim.edu.mk/mk/katedra/Katedra-za-baletska-pedagogija", "http://www.fmu.ukim.edu.mk/mk/katedra/Katedra-za-duvachki-instrumenti-udirachki-instrumenti-i-solo-peenje", "http://www.fmu.ukim.edu.mk/mk/katedra/Katedra-za-klavishni-instrumenti-i-harfa"] 
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "muzicko")
     data = []
     for url in urls:
         html = get_html_for_page(url)
@@ -40,7 +40,10 @@ def main():
         staff = content.find_all("div", {"class": "col-md-9"})
         data.extend([parse_data(researcher) for i, researcher in enumerate(staff)])
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "muzicko.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":

@@ -26,12 +26,12 @@ def get_html_for_page(url):
 def parse_data(researcher):
     anchor_elem = researcher.select("a")[0]
     researcher_name = " ".join(anchor_elem.get_text().strip("\n").split(" ")[::-1])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
     url = "https://feit.ukim.edu.mk/staff/"
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "ekonomski")
     html = get_html_for_page(url)
     soup = BeautifulSoup(html, "html.parser")
     content = soup.find("div", {"id": "content"})
@@ -39,7 +39,10 @@ def main():
     data = [parse_data(researcher) for researcher in staff]
 
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "ekonomski.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":

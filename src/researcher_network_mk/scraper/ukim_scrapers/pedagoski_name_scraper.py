@@ -31,12 +31,12 @@ def parse_data(researcher, last):
         researcher_name = researcher_name.strip("\t").split("д-р")[1]
     else:
         researcher_name = researcher_name.strip("\t").split("д-р ")[1]
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
     url = "https://pfsko.ukim.edu.mk/nastaven-kadar/"
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "pedagoski")
     html = get_html_for_page(url)
     soup = BeautifulSoup(html, "html.parser")
     content = soup.find("main", {"id": "content"})
@@ -44,7 +44,10 @@ def main():
     data = [parse_data(researcher, i == len(staff) - 1) for i, researcher in enumerate(staff)]
 
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "pedagoski.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":

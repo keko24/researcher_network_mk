@@ -26,12 +26,12 @@ def get_html_for_page(url):
 def parse_data(researcher):
     anchor_elem = researcher.select("p")[0]
     researcher_name = " ".join(anchor_elem.get_text().split("\n")[0].split(" ")[2:])
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_name)
+    researcher_latin_name = researcher_name
     return researcher_latin_name
 
 def main():
     urls = ["https://ftu.uklo.edu.mk/za-fakultetot/osnovni-informacii/kadar/"]
-    results_path = os.path.join(get_project_root(), "data", "researchers", "uklo")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "uklo", "turizam")
     data = []
     for url in urls:
         html = get_html_for_page(url)
@@ -40,7 +40,10 @@ def main():
         staff = content.find_all("div", {"class": "fusion-text"})
         data.extend([parse_data(researcher) for researcher in staff])
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "turizam.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":

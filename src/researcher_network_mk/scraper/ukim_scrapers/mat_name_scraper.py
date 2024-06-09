@@ -32,12 +32,12 @@ def parse_data(researcher):
         if c.isupper() and i != 0:
             researcher_latin_name += " "
         researcher_latin_name += c
-    researcher_latin_name = transliterate_cyrillic_to_latin(researcher_latin_name)
+    researcher_latin_name = researcher_latin_name
     return researcher_latin_name.strip()
 
 def main():
     urls = ["https://im.pmf.ukim.edu.mk/titles/view/19", "https://im.pmf.ukim.edu.mk/titles/view/2", "https://im.pmf.ukim.edu.mk/titles/view/17", "https://im.pmf.ukim.edu.mk/titles/view/13", "https://im.pmf.ukim.edu.mk/titles/view/18", "https://im.pmf.ukim.edu.mk/titles/view/12", "https://im.pmf.ukim.edu.mk/titles/view/15", "https://im.pmf.ukim.edu.mk/titles/view/11"]
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "matematika")
     data = []
     for url in urls:
         html = get_html_for_page(url)
@@ -46,7 +46,10 @@ def main():
         staff = content.find_all("div", {"class": "teachers"})
         data.extend([parse_data(researcher) for researcher in staff])
     os.makedirs(results_path, exist_ok=True)
-    pd.DataFrame(data, columns=["name"]).to_csv(os.path.join(results_path, "matematika.csv"))
+    df = pd.DataFrame(data, columns=["name"])
+    df["processed"] = False
+    df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 
 if __name__ == "__main__":
