@@ -29,13 +29,18 @@ def get_pub_properties(publication):
 def get_publications_info(researcher_name):
     search_query = scholarly.search_author(researcher_name)
     first_author_result = next(search_query)
+    affiliation, email = None, None
+    if "affiliation" in first_author_result:
+        affiliation = first_author_result["affiliation"]
+    if "email_domain" in first_author_result:
+        email = first_author_result["email_domain"]
     author = scholarly.fill(first_author_result)
     publications = []
     for pub in author["publications"]:
         pub_full = scholarly.fill(pub)
         time.sleep(random.uniform(1, 2))
         publications.append(get_pub_properties(pub_full)) 
-    return publications
+    return publications, affiliation, email
 
 def get_coauthors_stats(publications):
     coauthors = dict()
@@ -61,13 +66,13 @@ def main():
                 logger.info(f"Currently processing researcher {researcher_names[0]} from {faculty_name.upper()} at {university.upper()}")
                 for researcher_name in researcher_names:
                     try:
-                        publications = get_publications_info(researcher_name)
+                        publications, affiliation, email = get_publications_info(researcher_name)
                         if not publications:
                             logger.info(f"No publications found for {researcher_name}.")
                             continue
                         # coauthors = get_coauthors_stats(publications)
                         save_publications(publications, university, faculty_name, researcher_name)
-                        logger.info(f"Coauthor network for {researcher_name} has been created.")
+                        logger.info(f"Coauthor network for {researcher_name} with affiliation {affiliation} and email domain {email} has been created.")
                         researcher = researcher._replace(processed = True)
                         break
                     except Exception as e:
