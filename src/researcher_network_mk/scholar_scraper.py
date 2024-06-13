@@ -24,7 +24,7 @@ def get_pub_properties(publication):
         publication_type = "book"
     else:
         publication_type = "other"
-    return {"title": pub_bib["title"], "authors": pub_bib["author"].split(" and "), "publication_type": publication_type, "num_citations": publication["num_citations"]}
+    return {"title": pub_bib["title"], "authors": pub_bib["author"].split(" and "), "publication_year": pub_bib["year"] if "year" in pub_bib else "Unknown", "publication_type": publication_type, "num_citations": publication["num_citations"]}
 
 def get_publications_info(researcher_name):
     search_query = scholarly.search_author(researcher_name)
