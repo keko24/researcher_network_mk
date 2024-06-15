@@ -67,9 +67,11 @@ cyrillic_to_latin_map = {
 
 def split_surnames(name):
     if "Хаџи" not in name and "хаџи" not in name:
-        name = name.replace(" - ", " ").replace("-", " ")
+        name = name.replace(" - ", " ").replace(" -", " ").replace("- ", " ")...replace("-", " ") 
+        name = name.replace(" – ", " ").replace("– ", " ").replace(" –", " ").replace("–", " ") 
     else:
-        name = name.replace(" - ", "-")
+        name = name.replace(" - ", "-").replace("- ", "-").replace(" -", "-")
+        name = name.replace(" – ", "-").replace("– ", "-").replace(" –", "-")
     name_split = name.split(" ")
     if len(name_split) > 2:
         first_name, first_surname, second_surname = name_split

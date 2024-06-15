@@ -10,7 +10,7 @@ def translate_names_to_latin(names_mk):
     return [transliterate_cyrillic_to_latin(name) for name in names_mk]
 
 def main():
-    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "ekonomski_institut")
+    results_path = os.path.join(get_project_root(), "data", "researchers", "ukim", "arhitektonski")
 # List of names in Macedonian Cyrillic
     data_mk = [
         "Елизабета Аврамовска",
@@ -61,6 +61,7 @@ def main():
     os.makedirs(results_path, exist_ok=True)
     df = pd.DataFrame(data, columns=["name"])
     df["processed"] = False
+    df["found"] = False
     df.to_csv(os.path.join(results_path, "researchers.csv"))
 
 if __name__ == "__main__":

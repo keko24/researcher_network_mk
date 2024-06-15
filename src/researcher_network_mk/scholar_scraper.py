@@ -74,16 +74,16 @@ def main():
                         # coauthors = get_coauthors_stats(publications)
                         save_publications(publications, university, faculty_name, researcher_name)
                         logger.info(f"Coauthor network for {researcher_name} with affiliation {affiliation} and email domain {email} has been created.")
-                        researcher = researcher._replace(processed = True)
+                        researcher = researcher._replace(found = True)
                         break
                     except Exception as e:
                         logger.error(f"An error occured for {researcher_name}: {e}")
                         time.sleep(random.uniform(0.5, 1))
-                if not researcher.processed:
+                if not researcher.found:
                     logger.error(f"{researcher_names[0]} could not be found.")
-                else:
-                    researchers.loc[researcher.Index] = pd.Series({col: getattr(researcher, col) for col in researchers.columns})
-                    researchers.to_csv(faculty_path)
+                researcher = researcher._replace(processed = True)
+                researchers.loc[researcher.Index] = pd.Series({col: getattr(researcher, col) for col in researchers.columns})
+                researchers.to_csv(faculty_path)
 
 if __name__ == "__main__":
     main()

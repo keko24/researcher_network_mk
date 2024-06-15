@@ -25,6 +25,7 @@ def main():
     os.makedirs(results_path, exist_ok=True)
     df = pd.DataFrame(data, columns=["name"])
     df["processed"] = False
+    df["found"] = False
     df.to_csv(os.path.join(results_path, "researchers.csv"))
 
 
