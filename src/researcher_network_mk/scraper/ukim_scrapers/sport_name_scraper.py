@@ -4,10 +4,9 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
 from researcher_network_mk.utils import get_project_root
 
-USERNAME = "bube12_elDr7"
+USERNAME = "bube12_kYa8y"
 PASSWORD = "Researchscraper123"
 
 
