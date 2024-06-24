@@ -3,6 +3,7 @@ import time
 
 import pandas as pd
 from scholarly import scholarly
+from scholarly._proxy_generator import MaxTriesExceededException
 
 from researcher_network_mk.transliteration import \
     transliterate_cyrillic_to_latin
@@ -84,22 +85,36 @@ def main():
                 logger.info(
                     f"Currently processing researcher {researcher_names[0]} from {faculty_name.upper()} at {university.upper()}"
                 )
-                for researcher_name in researcher_names:
-                    try:
-                        publications, affiliation, email = get_publications_info(
-                            researcher_name, university, logger
-                        )
+
+                scholar_error = True
+                scholar_error_times = 0
+                while scholar_error and scholar_error_times < 2:
+                    scholar_error = False
+                    for researcher_name in researcher_names:
+                        try:
+                            publications, affiliation, email = get_publications_info(
+                                researcher_name, university, logger
+                            )
+                        except MaxTriesExceededException as e:
+                            scholar_error = True
+                            scholar_error_times += 1
+                            logger.error(f"({scholar_error_times}) An error occured for {researcher_name}: {e}")
+                            time.sleep(7200)
+                            break
+                        except Exception as e:
+                            logger.error(f"An error occured for {researcher_name}: {e}")
+                            time.sleep(random.uniform(0.5, 1))
+                            continue
+
                         if not publications:
                             logger.info(f"No publications found for {researcher_name}.")
                             continue
-                        # coauthors = get_coauthors_stats(publications)
+
                         save_publications(publications, university, faculty_name, researcher_name)
                         logger.info(f"Coauthor network for {researcher_name} with affiliation {affiliation} and email domain {email} has been created.")
                         researcher = researcher._replace(found = True)
                         break
-                    except Exception as e:
-                        logger.error(f"An error occured for {researcher_name}: {e}")
-                        time.sleep(random.uniform(0.5, 1))
+
                 if not researcher.found:
                     logger.error(f"{researcher_names[0]} could not be found.")
                 researcher = researcher._replace(processed = True)
