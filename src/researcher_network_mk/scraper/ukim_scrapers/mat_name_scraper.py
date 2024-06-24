@@ -1,11 +1,12 @@
 import os
-import requests
 
 import pandas as pd
+import requests
 from bs4 import BeautifulSoup
 
+from researcher_network_mk.transliteration import \
+    transliterate_cyrillic_to_latin
 from researcher_network_mk.utils import get_project_root
-from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
 
 USERNAME = "bube12_dKwRX"
 PASSWORD = "Researchscraper123"
@@ -48,6 +49,7 @@ def main():
     os.makedirs(results_path, exist_ok=True)
     df = pd.DataFrame(data, columns=["name"])
     df["processed"] = False
+    df["found"] = False
     df.to_csv(os.path.join(results_path, "researchers.csv"))
 
 
