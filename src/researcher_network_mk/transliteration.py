@@ -61,27 +61,57 @@ cyrillic_to_latin_map = {
     "Х": ["H"],
     "Ц": ["C"],
     "Ч": ["Ch", "C", "Č"],
-    "Џ": ["Dz", "Dj", "Dž", "Dzh"],
+    "Џ": ["Dj", "Dz", "Dž", "Dzh"],
     "Ш": ["Sh", "S", "Š"],
 }
 
+
 def split_surnames(name):
     if "Хаџи" not in name and "хаџи" not in name:
-        name = name.replace(" - ", " ").replace(" -", " ").replace("- ", " ").replace("-", " ") 
-        name = name.replace(" – ", " ").replace("– ", " ").replace(" –", " ").replace("–", " ") 
+        # The first expression replaces a hyphen, the second one a dash, and the third one an em dash.
+        name = (
+            name.replace(" - ", " ")
+            .replace(" -", " ")
+            .replace("- ", " ")
+            .replace("-", " ")
+        )
+        name = (
+            name.replace(" – ", " ")
+            .replace(" –", " ")
+            .replace("– ", " ")
+            .replace("–", " ")
+        )
+        name = (
+            name.replace(" — ", " ")
+            .replace(" —", " ")
+            .replace("— ", " ")
+            .replace("—", " ")
+        )
     else:
-        name = name.replace(" - ", "-").replace("- ", "-").replace(" -", "-")
-        name = name.replace(" – ", "-").replace("– ", "-").replace(" –", "-")
+        name = name.replace(" - ", "-").replace(" -", "-").replace("- ", "-")
+        name = name.replace(" – ", "–").replace(" –", "–").replace("– ", "–")
+        name = name.replace(" — ", "—").replace(" —", "—").replace("— ", "—")
     name_split = name.split(" ")
-    if len(name_split) > 2:
+    if len(name_split) > 3:
+        raise ValueError("Name consists of more than 3 subnames.")
+    elif len(name_split) > 2:
         first_name, first_surname, second_surname = name_split
-        return [f"{first_name} {first_surname}-{second_surname}", f"{first_name} {second_surname}-{first_surname}", f"{first_name} {first_surname} {second_surname}", f"{first_name} {second_surname} {first_surname}", f"{first_name} {first_surname}", f"{first_name} {second_surname}"]
+        return [
+            f"{first_name} {first_surname}-{second_surname}",
+            f"{first_name} {second_surname}-{first_surname}",
+            f"{first_name} {first_surname} {second_surname}",
+            f"{first_name} {second_surname} {first_surname}",
+            f"{first_name} {first_surname}",
+            f"{first_name} {second_surname}",
+        ]
     else:
         return [name]
 
+
 def replace_and_strip_spaces(text):
-    text = re.sub(r'\s+', ' ', text)
+    text = re.sub(r"\s+", " ", text)
     return text.strip()
+
 
 class Trie:
     def __init__(self, name: str, map: dict[str, list[str]]) -> None:
@@ -92,27 +122,37 @@ class Trie:
         return self.forward(0)
 
     def forward(self, idx) -> list[str]:
-        if len(self.trie) <= idx: 
+        if len(self.trie) <= idx:
             return [""]
         prefixes = self.trie[idx]
         suffixes = self.forward(idx + 1)
-        names = ([prefix + suffix for prefix in prefixes for suffix in suffixes])
+        names = [prefix + suffix for prefix in prefixes for suffix in suffixes]
         return names
 
     def set_trie(self, name):
         self.trie = [self.map[char] if char in self.map else [char] for char in name]
 
+
 def translit(name, map):
     trie = Trie(name, map)
     return trie.get_all_combinations()
 
+
 def transliterate_cyrillic_to_latin(name: str):
     name = replace_and_strip_spaces(name)
     name_variations = split_surnames(name)
-    return [item for name_variation in name_variations for item in translit(name_variation, cyrillic_to_latin_map)]
+    if name_variations:
+        return [
+            item
+            for name_variation in name_variations
+            for item in translit(name_variation, cyrillic_to_latin_map)
+        ]
+    return []
+
 
 def main():
     print(transliterate_cyrillic_to_latin("Бошко Петров-Чукалиев"))
+
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,14 @@ import json
 
 from pathlib import Path
 
+def load_json(path) -> dict | None:
+    if os.path.exists(path) and path.endswith(".json"):
+        with open(path, "r") as f:
+            data = json.load(f)
+            return data
+    else:
+        raise ValueError("Invalid path")
+
 def get_project_root():
     return Path(__file__).parent.parent.parent
 
@@ -37,3 +45,15 @@ def save_coauthors(faculty, researcher_name, coauthors):
     os.makedirs(path, exist_ok=True)
     with open(os.path.join(path, "_".join(researcher_name.split(" ")) + ".json"), "w") as f:
         json.dump(coauthors, f, indent=4)
+
+def list_universities():
+    researchers_path = os.path.join(get_project_root(), "data", "researchers")
+    return [university for university in os.listdir(researchers_path) if os.path.isdir(os.path.join(researchers_path, university))]
+
+def list_faculties(university):
+    university_path = os.path.join(get_project_root(), "data", "researchers", university)
+    return [faculty for faculty in os.listdir(university_path) if os.path.isdir(os.path.join(university_path, faculty))]
+
+def list_researchers(university, faculty):
+    university_path = os.path.join(get_project_root(), "data", "researchers", university, faculty, "publications")
+    return [researcher for researcher in os.listdir(university_path) if researcher.endswith(".json")]

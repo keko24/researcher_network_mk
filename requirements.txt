@@ -2,3 +2,6 @@ pandas
 beautifulsoup4
 scholarly
 selenium
+networkx
+neo4j
+thefuzz

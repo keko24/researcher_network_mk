@@ -1,18 +1,14 @@
-import pandas as pd
-
-from scholarly import scholarly
-import time
 import random
+import time
 
-from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
-from researcher_network_mk.utils import (
-    get_logger,
-    get_researcher_paths, 
-    save_publications
-)
+import pandas as pd
+from scholarly import scholarly
 
-def decode_unicode_escapes(text):
-    return text.encode().decode('unicode-escape')
+from researcher_network_mk.transliteration import \
+    transliterate_cyrillic_to_latin
+from researcher_network_mk.utils import (get_logger, get_researcher_paths,
+                                         save_publications)
+
 
 def get_pub_properties(publication):
     pub_bib = publication["bib"]
@@ -24,23 +20,35 @@ def get_pub_properties(publication):
         publication_type = "book"
     else:
         publication_type = "other"
-    return {"title": pub_bib["title"], "authors": pub_bib["author"].split(" and "), "publication_year": pub_bib["year"] if "year" in pub_bib else "Unknown", "publication_type": publication_type, "num_citations": publication["num_citations"]}
+    return {
+        "title": pub_bib["title"],
+        "authors": pub_bib["author"].split(" and "),
+        "publication_year": pub_bib["year"] if "year" in pub_bib else "Unknown",
+        "publication_type": publication_type,
+        "num_citations": publication["num_citations"],
+    }
 
-def get_publications_info(researcher_name):
+
+def get_publications_info(researcher_name, university, logger):
     search_query = scholarly.search_author(researcher_name)
-    first_author_result = next(search_query)
-    affiliation, email = None, None
-    if "affiliation" in first_author_result:
-        affiliation = first_author_result["affiliation"]
-    if "email_domain" in first_author_result:
-        email = first_author_result["email_domain"]
-    author = scholarly.fill(first_author_result)
-    publications = []
-    for pub in author["publications"]:
-        pub_full = scholarly.fill(pub)
-        time.sleep(random.uniform(1, 2))
-        publications.append(get_pub_properties(pub_full)) 
-    return publications, affiliation, email
+    for author in search_query:
+        if university in author["email_domain"]:
+            affiliation, email = None, None
+            if "affiliation" in author:
+                affiliation = author["affiliation"]
+            if "email_domain" in author:
+                email = author["email_domain"]
+            author = scholarly.fill(author)
+            publications = []
+            for pub in author["publications"]:
+                pub_full = scholarly.fill(pub)
+                time.sleep(random.uniform(1, 2))
+                publications.append(get_pub_properties(pub_full))
+            return publications, affiliation, email
+        else:
+            logger.info(f"Researcher {researcher_name} found but with an email domain {author["email_domain"]}, which differs from the university {university}.")
+    return None, None, None
+
 
 def get_coauthors_stats(publications):
     coauthors = dict()
@@ -53,21 +61,34 @@ def get_coauthors_stats(publications):
                 coauthors[author] = 1
     return coauthors
 
+
 def main():
     logger = get_logger()
     universities = get_researcher_paths()
     for university in universities:
-        for (faculty_name, faculty_path) in universities[university]:
+        for faculty_name, faculty_path in universities[university]:
             researchers = pd.read_csv(faculty_path, index_col=0)
             for researcher in researchers.itertuples():
                 if researcher.processed:
-                    logger.info(f"Researcher {researcher.name} has already been processed.")
+                    logger.info(
+                        f"Researcher {researcher.name} has already been processed."
+                    )
                     continue
-                researcher_names = transliterate_cyrillic_to_latin(researcher.name)
-                logger.info(f"Currently processing researcher {researcher_names[0]} from {faculty_name.upper()} at {university.upper()}")
+
+                try:
+                    researcher_names = transliterate_cyrillic_to_latin(researcher.name)
+                except ValueError as e:
+                    logger.error(f"There was a problem with the transliteration of {researcher.name}: {e}")
+                    continue
+
+                logger.info(
+                    f"Currently processing researcher {researcher_names[0]} from {faculty_name.upper()} at {university.upper()}"
+                )
                 for researcher_name in researcher_names:
                     try:
-                        publications, affiliation, email = get_publications_info(researcher_name)
+                        publications, affiliation, email = get_publications_info(
+                            researcher_name, university, logger
+                        )
                         if not publications:
                             logger.info(f"No publications found for {researcher_name}.")
                             continue
@@ -84,6 +105,7 @@ def main():
                 researcher = researcher._replace(processed = True)
                 researchers.loc[researcher.Index] = pd.Series({col: getattr(researcher, col) for col in researchers.columns})
                 researchers.to_csv(faculty_path)
+
 
 if __name__ == "__main__":
     main()
