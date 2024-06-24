@@ -4,11 +4,9 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
-from researcher_network_mk.transliteration import \
-    transliterate_cyrillic_to_latin
 from researcher_network_mk.utils import get_project_root
 
-USERNAME = "bube12_dKwRX"
+USERNAME = "bube12_elDr7"
 PASSWORD = "Researchscraper123"
 
 def get_html_for_page(url):
