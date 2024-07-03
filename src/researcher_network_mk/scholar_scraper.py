@@ -13,6 +13,8 @@ from researcher_network_mk.utils import (get_logger, get_researcher_paths,
 
 def get_pub_properties(publication):
     pub_bib = publication["bib"]
+    if "author" not in pub_bib:
+        return None
     if "journal" in pub_bib:
         publication_type = "journal"
     elif "conference" in pub_bib:
@@ -44,7 +46,9 @@ def get_publications_info(researcher_name, university, logger):
             for pub in author["publications"]:
                 pub_full = scholarly.fill(pub)
                 time.sleep(random.uniform(1, 2))
-                publications.append(get_pub_properties(pub_full))
+                publication = get_pub_properties(pub_full)
+                if publication:
+                    publications.append(publication)
             return publications, affiliation, email
         else:
             logger.info(f"Researcher {researcher_name} found but with an email domain {author["email_domain"]}, which differs from the university {university}.")
@@ -99,7 +103,7 @@ def main():
                             scholar_error = True
                             scholar_error_times += 1
                             logger.error(f"({scholar_error_times}) An error occured for {researcher_name}: {e}")
-                            time.sleep(7200)
+                            time.sleep(1800)
                             break
                         except Exception as e:
                             logger.error(f"An error occured for {researcher_name}: {e}")

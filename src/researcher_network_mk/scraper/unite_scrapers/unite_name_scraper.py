@@ -4,8 +4,10 @@ import pandas as pd
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 
+from researcher_network_mk.transliteration import \
+    transliterate_cyrillic_to_latin
 from researcher_network_mk.utils import get_project_root
-from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
+
 
 def parse_text(text):
     if " / " in text:
@@ -41,6 +43,7 @@ def main():
         os.makedirs(faculty_path, exist_ok=True)
         df = pd.DataFrame(data, columns=["name"])
         df["processed"] = False
+        df["found"] = False
         df.to_csv(os.path.join(faculty_path, "researchers.csv"))
 
 if __name__ == "__main__":
