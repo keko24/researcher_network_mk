@@ -1,14 +1,14 @@
 import os
-import requests
 
 import pandas as pd
+import requests
 from bs4 import BeautifulSoup
 
 from researcher_network_mk.utils import get_project_root
-from researcher_network_mk.transliteration import transliterate_cyrillic_to_latin
 
-USERNAME = "bube12_dKwRX" 
+USERNAME = "bube12_ZULBV"
 PASSWORD = "Researchscraper123"
+
 
 def get_html_for_page(url):
     payload = {
@@ -17,11 +17,12 @@ def get_html_for_page(url):
     }
     response = requests.post(
         "https://realtime.oxylabs.io/v1/queries",
-        auth=(USERNAME,PASSWORD),
+        auth=(USERNAME, PASSWORD),
         json=payload,
     )
     response.raise_for_status()
     return response.json()["results"][0]["content"]
+
 
 def parse_data(researcher):
     anchor_elem = researcher.select("p")[0]
@@ -29,9 +30,16 @@ def parse_data(researcher):
     researcher_latin_name = researcher_name
     return researcher_latin_name
 
+
 def main():
-    urls = ["https://fb.uklo.edu.mk/za-fakultetot/kadar/redovni_profesori/", "https://fb.uklo.edu.mk/za-fakultetot/kadar/vonredni-profesori/", "https://fb.uklo.edu.mk/za-fakultetot/kadar/profesori-vo-penzija/"]
-    results_path = os.path.join(get_project_root(), "data", "researchers", "uklo", "bezbednost")
+    urls = [
+        "https://fb.uklo.edu.mk/za-fakultetot/kadar/redovni_profesori/",
+        "https://fb.uklo.edu.mk/za-fakultetot/kadar/vonredni-profesori/",
+        "https://fb.uklo.edu.mk/za-fakultetot/kadar/profesori-vo-penzija/",
+    ]
+    results_path = os.path.join(
+        get_project_root(), "data", "researchers", "uklo", "bezbednost"
+    )
     data = []
     for url in urls:
         html = get_html_for_page(url)
@@ -42,7 +50,9 @@ def main():
     os.makedirs(results_path, exist_ok=True)
     df = pd.DataFrame(data, columns=["name"])
     df["processed"] = False
+    df["found"] = False
     df.to_csv(os.path.join(results_path, "researchers.csv"))
+
 
 if __name__ == "__main__":
     main()

@@ -3,7 +3,7 @@ def main():
         lines = f.readlines()
         for line in lines:
             if (
-                "An error occured for"
+                "transliteration"
                 in line
                 # or "found but with an email domain" in line
             ):
