@@ -107,7 +107,7 @@ def main():
                             break
                         except Exception as e:
                             logger.error(f"An error occured for {researcher_name}: {e}")
-                            time.sleep(random.uniform(0.5, 1))
+                            time.sleep(random.uniform(3, 5))
                             continue
 
                         if not publications:

@@ -161,15 +161,18 @@ def get_giant_component(G):
     Gcc = sorted(nx.connected_components(G), key=len, reverse=True)
     return G.subgraph(Gcc[0])
 
+
 def get_characteristic_path_length(G):
     G = convert_network_to_one_mode(G)
     G = get_giant_component(G)
     return nx.average_shortest_path_length(G)
 
+
 def get_diameter_of_network(G):
     G = convert_network_to_one_mode(G)
     G = get_giant_component(G)
     return nx.diameter(G)
+
 
 def calc_clustering_coefficient(G):
     clustering_coef = 0
@@ -186,3 +189,22 @@ def calc_clustering_coefficient(G):
             2 * num_edges_between_coauthors / (num_coauthors * (num_coauthors - 1))
         )
     return clustering_coef / len(researchers)
+
+def calc_pub_internationality(G):
+    publications = get_publications(G)
+    avg_pub_internationality = 0
+    for publication in publications:
+        avg_pub_internationality += 1 - len(G.neighbors(publication)) / G.nodes[publication].get("num_authors")
+    return avg_pub_internationality / len(publications)
+
+def calc_researcher_internationality(G):
+    researchers = get_researchers(G)
+    avg_researcher_internationality = 0
+    for researcher in researchers:
+        num_coauthors = 0
+        num_registered_coauthors = 0
+        for publication in G.neighbors(researcher):
+            num_coauthors += G.nodes[publication].get("num_authors")
+            num_registered_coauthors += len(G.neighbors(publication))
+        avg_researcher_internationality += 1 - num_registered_coauthors / num_coauthors
+    return avg_researcher_internationality / len(researchers)
